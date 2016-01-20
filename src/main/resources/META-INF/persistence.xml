@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	version="2.0">
+	<persistence-unit name="webapp" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+
+		<properties>
+			<!--Connection properties -->
+			<property name="javax.persistence.jdbc.user" value="admin" />
+			<property name="javax.persistence.jdbc.password" value="admin" />
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:mysql://localhost:3306/webapp?createDatabaseIfNotExist=true" />
+
+			<!-- C3P0 connection pool -->
+			<property name="hibernate.c3p0.timeout" value="1000" />
+			<property name="hibernate.c3p0.maxIdleTimeExcessConnections"
+				value="20" />
+
+			<!-- Connection testing settings -->
+			<property name="hibernate.c3p0.validate" value="false" />
+			<property name="hibernate.c3p0.idle_test_period" value="30" />
+			<property name="hibernate.c3p0.automaticTestTable" value="conTestTable" />
+
+			<!-- Enable Hibernate's automatic session context management -->
+			<property name="hibernate.current_session_context_class" value="thread" />
+
+			<!-- Disable the second-level cache -->
+			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheProvider" />
+
+			<!-- Echo all executed SQL to stdout -->
+			<property name="hibernate.show_sql" value="false" />
+
+			<!-- Drop and re-create the database schema on startup -->
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+
+			<!--Hibernate properties -->
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+			<!-- <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/> -->
+			
+		</properties>
+	</persistence-unit>
+</persistence>

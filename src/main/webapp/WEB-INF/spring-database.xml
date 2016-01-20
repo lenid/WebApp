@@ -1,0 +1,16 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- Need to delete -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config.properties" />
+	</bean>
+
+	<!-- Used only by spring-security to check users access -->
+	<bean id="dataSource" class="gran.home.template.dao.DriverManagerDataSourceOwnImpl">
+		<constructor-arg value="src/main/resources/META-INF/persistence.xml" />
+	</bean>
+
+</beans>
