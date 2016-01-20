@@ -1,6 +1,5 @@
 package gran.home.template.controllers;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import gran.home.template.dao.DaoFactory;
 import gran.home.template.dao.AccountDao;
 import gran.home.template.data.MessageVo;
 import gran.home.template.entity.Account;
@@ -42,6 +41,9 @@ public class AccountController extends BaseController {
 	@Qualifier("authenticationManager")
 	protected AuthenticationManager authenticationManager;
 
+	@Autowired
+	private AccountDao accountDao;
+
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(@RequestParam(value = "error", required = false) Boolean isError, ModelMap model) {
 		if (isError != null && isError) {
@@ -50,32 +52,25 @@ public class AccountController extends BaseController {
 		}
 		return "login";
 	}
-	
+
 	@RequestMapping(value = "/signup", method = RequestMethod.GET)
 	public ModelAndView getSignUpPage(HttpServletRequest request, HttpServletResponse response) {
 		initModel("account");
 		includeAccountData(false);
 		includeNaviPanel(false);
-		addObject("user", new Account());
+		addObject("account", new Account());
 
 		return getModel();
 	}
 
 	@RequestMapping(value = "/signup", method = RequestMethod.POST)
-	public String createAccount(@ModelAttribute("user") Account user, HttpServletRequest request, HttpServletResponse response) {
-		user.setType(Type.USER);
-		user.setHashPasswd(SecurityHelper.getHashPassword(user.getNewPasswd()));
+	public String createAccount(@ModelAttribute("account") Account account, HttpServletRequest request, HttpServletResponse response) {
+		account.setType(Type.USER);
+		account.setHashPasswd(SecurityHelper.getHashPassword(account.getNewPasswd()));
 
-		AccountDao dao = null;
-		try {
-			dao = DaoFactory.getAccountDao();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		dao.create(user);
+		accountDao.create(account);
 
-		authenticateUserAndSetSession(user, request);
+		authenticateUserAndSetSession(account, request);
 
 		return "redirect:/";
 	}
@@ -88,40 +83,27 @@ public class AccountController extends BaseController {
 	@RequestMapping(value = "/account", method = RequestMethod.GET)
 	public ModelAndView getAccount(@ModelAttribute ArrayList<MessageVo> messages, HttpServletRequest request) {
 		initModel("account", messages);
-		try {
-			addObject("user", SecurityHelper.getUser());
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		addObject("account", accountDao.getByLogin(SecurityHelper.getUsername()));
 		addObject("isNewAccount", false); // will be delete
 
 		return getModel();
 	}
 
 	@RequestMapping(value = "/account", method = RequestMethod.POST)
-	public String createOrEdit(@ModelAttribute("user") Account user, RedirectAttributes redirectAttributes) throws Exception {
+	public String createOrEdit(@ModelAttribute("account") Account account, RedirectAttributes redirectAttributes) throws Exception {
 		List<MessageVo> messages = new ArrayList<>();
-		AccountDao userDao = null;
 
-		try {
-			userDao = DaoFactory.getAccountDao();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (user.getId() == null) {
+		if (account.getId() == null) {
 			// userDao.create(user);
 		} else {
-			if (checkPasswd(user)) {
-				userDao.update(user);
+			if (checkPasswd(account)) {
+				accountDao.update(account);
 				messages.add(new MessageVo(true, "Account updated"));
 			} else {
 				messages.add(new MessageVo(false, "You typed wrong old password!"));
 			}
 
-			if (!SecurityHelper.getUsername().equals(user.getLogin())) {
+			if (!SecurityHelper.getUsername().equals(account.getLogin())) {
 				SecurityContextHolder.getContext().setAuthentication(null);
 			}
 			redirectAttributes.addFlashAttribute(messages);
@@ -130,10 +112,13 @@ public class AccountController extends BaseController {
 		return "redirect:/account";
 	}
 
-	private boolean checkPasswd(Account user) throws SQLException {
-		if (!user.getNewPasswd().equals("")) {
-			if (SecurityHelper.checkPasswd(user.getOldPasswd())) {
-				user.setHashPasswd(SecurityHelper.getHashPassword(user.getNewPasswd()));
+	private boolean checkPasswd(Account account) {
+		if (!account.getNewPasswd().equals("")) {
+			String encodedPassword = accountDao.getByLogin(SecurityHelper.getUsername()).getHashPasswd();
+			String rawPassword = account.getOldPasswd();
+			
+			if (new BCryptPasswordEncoder().matches(rawPassword, encodedPassword)) {
+				account.setHashPasswd(SecurityHelper.getHashPassword(account.getNewPasswd()));
 			} else {
 				return false;
 			}
@@ -141,10 +126,10 @@ public class AccountController extends BaseController {
 		return true;
 	}
 
-	private void authenticateUserAndSetSession(Account user, HttpServletRequest request) {
-		String username = user.getLogin();
-		String password = user.getNewPasswd();
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+	private void authenticateUserAndSetSession(Account account, HttpServletRequest request) {
+		String login = account.getLogin();
+		String password = account.getNewPasswd();
+		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(login, password);
 		token.setDetails(new WebAuthenticationDetails(request));
 		Authentication authenticatedUser = authenticationManager.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authenticatedUser);

@@ -14,26 +14,33 @@ import gran.home.template.entity.BaseEntity;
 import gran.home.template.util.PropertyLoader;
 
 public abstract class Dao<E extends BaseEntity> {
-	private static final EntityManagerFactory ENTITY_MANAGER_FACTORY;
-	protected static EntityManager entityManager;
+	private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory(PropertyLoader.getDbName());
+	protected EntityManager entityManager;
 	private final Class<E> entityClass;
 
 	public Dao(Class<E> clazz) {
 		this.entityClass = clazz;
 	}
 
-	static {
-		try {
-			ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory(PropertyLoader.getDbName());
-		} catch (Throwable ex) {
-			throw new ExceptionInInitializerError(ex);
-		}
-	}
-
 	public static void stop() {
 		ENTITY_MANAGER_FACTORY.close();
 	}
 
+	protected EntityManager getEntityManager() {
+		// if (entityManager == null) {
+		entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
+		// }
+		// if (!entityManager.isOpen()) {
+		// System.out.println("Error!!!!!! entityManager is closed");
+		// }
+
+		if (!ENTITY_MANAGER_FACTORY.isOpen()) {
+			System.out.println("ENTITY_MANAGER_FACTORY is closed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		}
+
+		return entityManager;
+	}
+	
 	public void create(E entity) {
 		EntityManager entityManager = getEntityManager();
 		entityManager.getTransaction().begin();
@@ -70,21 +77,6 @@ public abstract class Dao<E extends BaseEntity> {
 
 	public void delete(int id) {
 		delete(getById(id));
-	}
-
-	public EntityManager getEntityManager() {
-		// if (entityManager == null) {
-		entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();
-		// }
-		// if (!entityManager.isOpen()) {
-		// System.out.println("Error!!!!!! entityManager is closed");
-		// }
-
-		if (!ENTITY_MANAGER_FACTORY.isOpen()) {
-			System.out.println("ENTITY_MANAGER_FACTORY is closed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		}
-
-		return entityManager;
 	}
 
 	@SuppressWarnings("unchecked")

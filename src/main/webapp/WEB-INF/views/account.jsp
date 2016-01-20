@@ -18,7 +18,7 @@
 
 <div class="${col}">
 
-	<form:form id="accountForm" class="form-horizontal" method="POST" action="${action}" modelAttribute="user" role="form">
+	<form:form id="accountForm" class="form-horizontal" method="POST" action="${action}" modelAttribute="account" role="form">
 		<form:hidden path="id" />
 		<form:hidden path="type" />
 		<form:hidden path="hashPasswd" />
@@ -98,7 +98,7 @@
 				<label class="${col_1} control-label"><s:message code="account.label.created" /></label>
 				<div class="${col_2}">
 					<label class="control-label"><nobr>
-							<fmt:formatDate value="${user.created}" pattern='${dateFormat}' />
+							<fmt:formatDate value="${account.created}" pattern='${dateFormat}' />
 						</nobr></label>
 				</div>
 			</div>

@@ -9,17 +9,12 @@
 	<http pattern="/js/**" security="none" />
 	<http pattern="/vendors/**" security="none" />
 
-	<http auto-config="false" use-expressions="true" access-denied-page="/error403.jsp">
+	<http auto-config="false" use-expressions="true" access-denied-page="/WEB-INF/views/error403.jsp">
 		<intercept-url pattern="/login" access="permitAll" />
 		<intercept-url pattern="/logout" access="permitAll" />
 		<intercept-url pattern="/signup" access="permitAll" />
-		<intercept-url pattern="/" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/index" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/user*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/mail*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/phrase*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/group*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/template*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
+		<intercept-url pattern="/account*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')" />
 		<form-login login-page='/login' default-target-url="/index" authentication-failure-url="/login?error=true" />
 		<logout logout-url="/logout" logout-success-url="/login" />

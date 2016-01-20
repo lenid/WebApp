@@ -1,8 +1,7 @@
 package gran.home.template.util;
 
-import gran.home.template.dao.Dao;
-import gran.home.template.dao.DaoFactory;
 import gran.home.template.dao.AccountDao;
+import gran.home.template.dao.Dao;
 import gran.home.template.entity.Account;
 import gran.home.template.entity.Account.Type;
 
@@ -14,7 +13,7 @@ public class FirstUser {
 	public static void main(String[] args) {
 
 		try {
-			if (new FirstUser().createUser()) {
+			if (new FirstUser().createAccount()) {
 				System.out.printf("User was created with login \"%s\" and password \"%s\"", LOGIN, "pass");
 			} else {
 				System.err.println("Creating first user has failed!");
@@ -27,16 +26,16 @@ public class FirstUser {
 
 	}
 
-	private boolean createUser() throws Exception {
-		AccountDao dao = DaoFactory.getAccountDao();
+	private boolean createAccount() throws Exception {
+		AccountDao dao = new AccountDao();;
 
-		Account oldUser = dao.getByLogin(LOGIN);
-		if (oldUser != null) {
-			dao.delete(oldUser.getId());
+		Account oldAccount = dao.getByLogin(LOGIN);
+		if (oldAccount != null) {
+			dao.delete(oldAccount.getId());
 		}
 
-		Account user = getUser();
-		dao.create(user);
+		Account account = getAccount();
+		dao.create(account);
 
 		if (dao.getByLogin(LOGIN) == null) {
 			return false;
@@ -44,14 +43,14 @@ public class FirstUser {
 		return true;
 	}
 
-	private Account getUser() {
-		Account user = new Account();
+	private Account getAccount() {
+		Account account = new Account();
 
-		user.setLogin(LOGIN);
-		user.setHashPasswd(PASSWD);
-		user.setType(Type.ADMIN);
+		account.setLogin(LOGIN);
+		account.setHashPasswd(PASSWD);
+		account.setType(Type.ADMIN);
 
-		return user;
+		return account;
 	}
 
 }

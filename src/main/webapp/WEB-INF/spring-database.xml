@@ -12,5 +12,7 @@
 	<bean id="dataSource" class="gran.home.template.dao.DriverManagerDataSourceOwnImpl">
 		<constructor-arg value="src/main/resources/META-INF/persistence.xml" />
 	</bean>
+	
+	<bean class="gran.home.template.dao.AccountDao" />
 
 </beans>
