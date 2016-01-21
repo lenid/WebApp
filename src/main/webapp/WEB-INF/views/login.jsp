@@ -49,11 +49,12 @@ h4 {
 		<c:if test="${not empty param.error}">
 			<div class="alert alert-danger" role="alert">
 				<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> 
-				Error: <s:message code="login.error.bad_cred" />
-				<!-- Will be delete -->
-				<p>
+				<c:if test="${not empty errorMessage}">
+					<s:message code="${errorMessage}" />
+				</c:if>
+				<c:if test="${empty errorMessage}">
 					${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}
-				</p>
+				</c:if>
 			</div>
 		</c:if>
 	</div>

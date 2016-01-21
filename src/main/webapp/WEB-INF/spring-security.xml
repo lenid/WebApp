@@ -13,6 +13,7 @@
 		<intercept-url pattern="/login" access="permitAll" />
 		<intercept-url pattern="/logout" access="permitAll" />
 		<intercept-url pattern="/signup" access="permitAll" />
+		<intercept-url pattern="/" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/index" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/account*" access="hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')" />
 		<intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')" />

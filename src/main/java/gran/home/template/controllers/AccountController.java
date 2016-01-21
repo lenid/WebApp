@@ -5,10 +5,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +48,15 @@ public class AccountController extends BaseController {
 	private AccountDao accountDao;
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String login(@RequestParam(value = "error", required = false) Boolean isError, ModelMap model) {
+	public String login(@RequestParam(value = "error", required = false) Boolean isError, ModelMap model, HttpServletRequest request) {
+		Object obj = request.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+		if (obj instanceof BadCredentialsException) {
+			model.addAttribute("errorMessage", "login.error.bad_cred");
+		}
+		if (obj instanceof AuthenticationServiceException) {
+			model.addAttribute("errorMessage", "login.error.not_connection");
+		}
+		
 		if (isError != null && isError) {
 			model.addAttribute("error", "true");
 			return "login";
