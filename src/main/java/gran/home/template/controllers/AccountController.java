@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,14 +47,18 @@ public class AccountController extends BaseController {
 	@Autowired
 	private AccountDao accountDao;
 
+	private static final Logger logger = Logger.getLogger(AccountController.class);
+	
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(@RequestParam(value = "error", required = false) Boolean isError, ModelMap model, HttpServletRequest request) {
-		Object obj = request.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
-		if (obj instanceof BadCredentialsException) {
+		Throwable exception = (Throwable) request.getSession().getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+		if (exception instanceof BadCredentialsException) {
 			model.addAttribute("errorMessage", "login.error.bad_cred");
+			logger.warn("User typed bad credential");
 		}
-		if (obj instanceof AuthenticationServiceException) {
+		if (exception instanceof AuthenticationServiceException) {
 			model.addAttribute("errorMessage", "login.error.not_connection");
+			logger.error("Could not get JDBC Connection!", exception);
 		}
 		
 		if (isError != null && isError) {
@@ -79,7 +83,7 @@ public class AccountController extends BaseController {
 		account.setType(Type.USER);
 		account.setHashPasswd(SecurityHelper.getHashPassword(account.getNewPasswd()));
 
-		accountDao.create(account);
+		accountDao.create(account); // catch
 
 		authenticateUserAndSetSession(account, request);
 
@@ -108,7 +112,7 @@ public class AccountController extends BaseController {
 			// userDao.create(user);
 		} else {
 			if (checkPasswd(account)) {
-				accountDao.update(account);
+				accountDao.update(account); // catch
 				messages.add(new MessageVo(true, "Account updated"));
 			} else {
 				messages.add(new MessageVo(false, "You typed wrong old password!"));
